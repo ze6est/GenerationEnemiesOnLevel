@@ -1,12 +1,22 @@
 using UnityEngine;
 
-public class SpawnPoint : MonoBehaviour
+namespace Assets.CodeBase
 {
-    [SerializeField] private Vector3 _position;
-    [SerializeField] private Vector3 _enemieDirection;
+    public class SpawnPoint : MonoBehaviour
+    {
+        [SerializeField] private Vector3 _position;
+        [SerializeField] private EnemieType _enemieType;
 
-    public Vector3 EnemieDirection => _enemieDirection;
+        private Transform _target;
 
-    private void OnValidate() => 
-        transform.position = _position;
+        public Transform Target => _target;
+        public EnemieType EnemieType => _enemieType;
+
+        private void OnValidate()
+        {
+            transform.position = _position;
+
+            _target = GetComponentInChildren<Target>().transform;
+        }
+    }
 }

@@ -1,29 +1,37 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class Enemie : MonoBehaviour
+namespace Assets.CodeBase
 {
-    private Coroutine _moveJob;
-    private Vector3 _direction;
-
-    public void Init(Vector3 direction) => 
-        _direction = direction;
-
-    private void Start() => 
-        _moveJob = StartCoroutine(Move());
-
-    private void OnDestroy()
+    public class Enemie : MonoBehaviour
     {
-        if(_moveJob != null )
-            StopCoroutine(_moveJob);
-    }
+        [SerializeField] private EnemieType _enemieType;
+        [SerializeField] private float _speed;
+        [SerializeField] private Transform _target;
 
-    private IEnumerator Move()
-    {
-        while (true)
+        private Coroutine _moveJob;
+
+        public EnemieType EnemieType => _enemieType;
+
+        public void Init(Transform target) =>
+            _target = target;
+
+        private void Start() =>
+            _moveJob = StartCoroutine(MoveToTarget());
+
+        private void OnDestroy()
         {
-            transform.Translate(_direction * Time.deltaTime);
-            yield return null;
-        }        
+            if (_moveJob != null)
+                StopCoroutine(_moveJob);
+        }
+
+        private IEnumerator MoveToTarget()
+        {
+            while (true)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, _target.position, _speed * Time.deltaTime);
+                yield return null;
+            }
+        }
     }
 }

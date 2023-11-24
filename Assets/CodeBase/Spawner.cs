@@ -3,64 +3,53 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Spawner : MonoBehaviour
+namespace Assets.CodeBase
 {
-    private const string EnemiePath = "Prefabs/Enemie";
-
-    [SerializeField] private SpawnPoint[] _spawnPoints;
-    [SerializeField] private int _enemiesCount;
-    [SerializeField] private float _spawnDuration;
-
-    private List<Enemie> _enemies = new List<Enemie>();    
-    private Coroutine _spawnEnemieJob;
-    private bool _isGameOn;
-
-    private void Awake()
+    public class Spawner : MonoBehaviour
     {
-        _isGameOn = true;
-        _spawnPoints = GetComponentsInChildren<SpawnPoint>();
-        CreateEnemies();
-    }
+        private const string EnemiePath = "Prefabs/Enemies";
 
-    private void Start() => 
-        _spawnEnemieJob = StartCoroutine(SpawnEnemie());
+        [SerializeField] private SpawnPoint[] _spawnPoints;        
+        [SerializeField] private float _spawnDuration;
 
-    private void OnDestroy() => 
-        StopCoroutine(_spawnEnemieJob);
+        private List<Enemie> _enemies = new List<Enemie>();
+        private Coroutine _spawnEnemieJob;
+        private bool _isGameOn;
 
-    private void CreateEnemies()
-    {
-        Enemie enemie = Resources.Load<Enemie>(EnemiePath);        
-
-        for (int i = 0; i < _enemiesCount; i++)
+        private void Awake()
         {
-            Enemie enemieInstance = Instantiate<Enemie>(enemie);
-            _enemies.Add(enemieInstance);
-            enemieInstance.gameObject.SetActive(false);
+            _isGameOn = true;
+            _spawnPoints = GetComponentsInChildren<SpawnPoint>();
+            LoadEnemies();
         }
-    }
 
-    private IEnumerator SpawnEnemie()
-    {
-        var waitTime = new WaitForSeconds(_spawnDuration);        
+        private void Start() =>
+            _spawnEnemieJob = StartCoroutine(SpawnEnemie());
 
-        while (_isGameOn)
+        private void OnDestroy() =>
+            StopCoroutine(_spawnEnemieJob);
+
+        private void LoadEnemies() => 
+            _enemies = Resources.LoadAll<Enemie>(EnemiePath).ToList();
+
+        private IEnumerator SpawnEnemie()
         {
-            yield return waitTime;
+            WaitForSeconds waitTime = new WaitForSeconds(_spawnDuration);
 
+            while (_isGameOn)
             {
-                int spawnPointIndex = Random.Range(0, _spawnPoints.Length);
-                Enemie enemie = _enemies.FirstOrDefault(x => x.gameObject.activeInHierarchy == false);
+                yield return waitTime;
 
-                if (enemie != null)
                 {
+                    int spawnPointIndex = Random.Range(0, _spawnPoints.Length);
                     SpawnPoint spawnPoint = _spawnPoints[spawnPointIndex];
-                    enemie.transform.position = spawnPoint.transform.position;
-                    enemie.Init(spawnPoint.EnemieDirection);
-                    enemie.gameObject.SetActive(true);
+
+                    Enemie enemie = _enemies.FirstOrDefault<Enemie>(x => x.EnemieType == spawnPoint.EnemieType);
+                    enemie.Init(spawnPoint.Target);                    
+
+                    Instantiate(enemie, spawnPoint.transform.position, Quaternion.identity);                    
                 }
             }
-            
-        }        
+        }
     }
 }
