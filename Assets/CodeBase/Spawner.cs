@@ -45,9 +45,13 @@ namespace Assets.CodeBase
                     SpawnPoint spawnPoint = _spawnPoints[spawnPointIndex];
 
                     Enemie enemie = _enemies.FirstOrDefault<Enemie>(x => x.EnemieType == spawnPoint.EnemieType);
-                    enemie.Init(spawnPoint.Target);                    
+                    
+                    if (enemie != null )
+                    {
+                        enemie.Init(spawnPoint.Target);
 
-                    Instantiate(enemie, spawnPoint.transform.position, Quaternion.identity);                    
+                        Instantiate(enemie, spawnPoint.transform.position, Quaternion.identity);
+                    }                    
                 }
             }
         }
